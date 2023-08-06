@@ -52,6 +52,26 @@ class SpinFragment : Fragment() {
                 }
 
             )
+
+        Firebase.database.reference.child("PlayChance").child(Firebase.auth.currentUser!!.uid).
+        addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists())
+                {
+                    binding.spinchance.text=(snapshot.getValue() as Long).toString()
+                }
+                else{
+                    var temp=0
+                    binding.spinchance.text=temp.toString()
+                    binding.spinBtn.isEnabled=false
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
         return binding.root
     }
 

@@ -2,6 +2,7 @@ package com.example.quizapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import com.example.quizapp.databinding.ActivityQuizBinding
 import com.example.quizapp.model.Question
@@ -20,11 +21,28 @@ class QuizActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityQuizBinding.inflate(layoutInflater)
     }
+    var currentChance=0L
     var currentQuestion=0
+    var score=0
     private lateinit var questionList: ArrayList<Question>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        Firebase.database.reference.child("PlayChance").child(Firebase.auth.currentUser!!.uid).
+            addValueEventListener(object :ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.exists())
+                    {
+                        currentChance=snapshot.value as Long
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            })
+
         questionList= ArrayList<Question>()
         var image=intent.getIntExtra("catimg",0)
         var catText=intent.getStringExtra("categoryType")
@@ -79,26 +97,38 @@ class QuizActivity : AppCompatActivity() {
         }
 
         binding.option1.setOnClickListener {
-            nextQuestionAndScoreUpdate()
+            nextQuestionAndScoreUpdate(binding.option1.text.toString())
         }
         binding.option2.setOnClickListener {
-            nextQuestionAndScoreUpdate()
+            nextQuestionAndScoreUpdate(binding.option2.text.toString())
         }
         binding.option3.setOnClickListener {
-            nextQuestionAndScoreUpdate()
+            nextQuestionAndScoreUpdate(binding.option3.text.toString())
         }
         binding.option4.setOnClickListener {
-            nextQuestionAndScoreUpdate()
+            nextQuestionAndScoreUpdate(binding.option4.text.toString())
         }
 
 
     }
 
-    private fun nextQuestionAndScoreUpdate() {
+    private fun nextQuestionAndScoreUpdate(s:String) {
+        if(s.equals(questionList.get(currentQuestion).ans))
+        {
+            score+=10
+        }
         currentQuestion++
         if(currentQuestion>=questionList.size)
         {
-            Toast.makeText(this, "You have reached to end.", Toast.LENGTH_SHORT).show()
+            if(score>=30)
+            {
+                 binding.winner.visibility=View.VISIBLE
+                 Firebase.database.reference.child("PlayChance").child(Firebase.auth.currentUser!!.uid).setValue(currentChance+1)
+            }
+            else
+            {
+                binding.sorry.visibility=View.VISIBLE
+            }
         }
         else
         {
