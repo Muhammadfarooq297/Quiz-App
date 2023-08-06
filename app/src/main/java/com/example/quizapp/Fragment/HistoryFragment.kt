@@ -55,6 +55,7 @@ class HistoryFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         binding.HistoryRecyclerView.layoutManager= LinearLayoutManager(requireContext())
         var adapter= HistoryAdapter(ListHistory)
         binding.HistoryRecyclerView.adapter=adapter
