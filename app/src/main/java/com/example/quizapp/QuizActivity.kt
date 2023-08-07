@@ -28,6 +28,24 @@ class QuizActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        Firebase.database.reference.child("playerCoins").child(Firebase.auth.currentUser!!.uid).
+        addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists())
+                {
+                    var currentCoins=snapshot.getValue() as Long
+                    binding.coinwithdraw.text=currentCoins.toString()
+
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
         Firebase.database.reference.child("PlayChance").child(Firebase.auth.currentUser!!.uid).
             addValueEventListener(object :ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -90,7 +108,7 @@ class QuizActivity : AppCompatActivity() {
             bottomSheetDialog.show(this@QuizActivity.supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition
         }
-        binding.coin.setOnClickListener {
+        binding.coinwithdraw.setOnClickListener {
             val bottomSheetDialog: BottomSheetDialogFragment = withdrawal()
             bottomSheetDialog.show(this@QuizActivity.supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition

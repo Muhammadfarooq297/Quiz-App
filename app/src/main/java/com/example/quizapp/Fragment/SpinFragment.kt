@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.example.quizapp.R
 import com.example.quizapp.databinding.FragmentSpinBinding
+import com.example.quizapp.model.HistoryModelClass
 import com.example.quizapp.model.User
 import com.example.quizapp.withdrawal
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -25,6 +26,8 @@ class SpinFragment : Fragment() {
     private lateinit var binding:FragmentSpinBinding
     private lateinit var timer: CountDownTimer
     private val itemTitles= arrayOf("100","Try again","500","Try again","200","Try again")
+    var currentChance=0L
+    var currentCoins=0L
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,6 +61,7 @@ class SpinFragment : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if(snapshot.exists())
                 {
+                    currentChance=snapshot.getValue() as Long
                     binding.spinchance.text=(snapshot.getValue() as Long).toString()
                 }
                 else{
@@ -72,12 +76,40 @@ class SpinFragment : Fragment() {
             }
 
         })
+
+        Firebase.database.reference.child("playerCoins").child(Firebase.auth.currentUser!!.uid).
+        addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists())
+                {
+                    currentCoins=snapshot.getValue() as Long
+                    binding.coinwithdraw.text=currentCoins.toString()
+
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
         return binding.root
     }
 
-    private fun showResult(itemTitle:String)
+    private fun showResult(itemTitle:String,spin:Int)
     {
+        if(spin%2==0)
+        {
+            var winCoin=itemTitle.toInt()
+            Firebase.database.reference.child("playerCoins").child(Firebase.auth.currentUser!!.uid).setValue(winCoin+currentCoins)
+            var historyModelClass=HistoryModelClass(System.currentTimeMillis().toString(),winCoin.toString(),false)
+            Firebase.database.reference.child("playerCoinsHistory").child(Firebase.auth.currentUser!!.uid).push().setValue(historyModelClass)
+            binding.coinwithdraw.text=(winCoin+currentCoins).toString()
+        }
         Toast.makeText(requireContext(),itemTitle, Toast.LENGTH_SHORT).show()
+        currentChance = currentChance-1
+        Firebase.database.reference.child("PlayChance").child(Firebase.auth.currentUser!!.uid).setValue(currentChance)
         binding.spin.isEnabled=true
     }
 
@@ -89,14 +121,16 @@ class SpinFragment : Fragment() {
             bottomSheetDialog.show(requireActivity().supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition
         }
-        binding.coin.setOnClickListener {
+        binding.coinwithdraw.setOnClickListener {
             val bottomSheetDialog: BottomSheetDialogFragment = withdrawal()
             bottomSheetDialog.show(requireActivity().supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition
         }
         binding.spinBtn.setOnClickListener {
             binding.spin.isEnabled=false
-
+        
+        if(currentChance>0)
+        {
             val spin = Random().nextInt(6)
             val degrees=60f * spin
 
@@ -109,13 +143,18 @@ class SpinFragment : Fragment() {
                     if(rotation >= degrees){
                         rotation=degrees
                         timer.cancel()
-                        showResult(itemTitles[spin])
+                        showResult(itemTitles[spin],spin)
                     }
                     binding.wheel.rotation=rotation
                 }
 
                 override fun onFinish() {}
             }.start()
+        }
+        else{
+            Toast.makeText(activity, "Out of spin chance.", Toast.LENGTH_SHORT).show()
+        }
+           
 
         }
     }

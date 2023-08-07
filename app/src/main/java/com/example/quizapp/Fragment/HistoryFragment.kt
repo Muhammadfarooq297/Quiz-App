@@ -27,12 +27,27 @@ class HistoryFragment : Fragment() {
         FragmentHistoryBinding.inflate(layoutInflater)
     }
     private var ListHistory=ArrayList<HistoryModelClass>()
+    lateinit var adapter : HistoryAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ListHistory.add(HistoryModelClass("12:03","200"))
-        ListHistory.add(HistoryModelClass("5:46","800"))
-        ListHistory.add(HistoryModelClass("11:03","700"))
-        ListHistory.add(HistoryModelClass("09:56","400"))
+        Firebase.database.reference.child("playerCoinsHistory").child(Firebase.auth.currentUser!!.uid)
+            .addValueEventListener(object :ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    ListHistory.clear()
+                    for(datasnapshot in snapshot.children)
+                    {
+                        var data=datasnapshot.getValue(HistoryModelClass::class.java)
+                        ListHistory.add(data!!)
+                        adapter.notifyDataSetChanged()
+                    }
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                  //  TODO("Not yet implemented")
+                }
+            })
+
 
 
     }
@@ -44,7 +59,7 @@ class HistoryFragment : Fragment() {
             bottomSheetDialog.show(requireActivity().supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition
         }
-        binding.coin.setOnClickListener {
+        binding.coinwithdraw.setOnClickListener {
             val bottomSheetDialog: BottomSheetDialogFragment = withdrawal()
             bottomSheetDialog.show(requireActivity().supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition
@@ -57,7 +72,7 @@ class HistoryFragment : Fragment() {
     ): View? {
 
         binding.HistoryRecyclerView.layoutManager= LinearLayoutManager(requireContext())
-        var adapter= HistoryAdapter(ListHistory)
+        adapter= HistoryAdapter(ListHistory)
         binding.HistoryRecyclerView.adapter=adapter
         binding.HistoryRecyclerView.setHasFixedSize(true)
 
@@ -78,6 +93,24 @@ class HistoryFragment : Fragment() {
                 }
 
             )
+
+        Firebase.database.reference.child("playerCoins").child(Firebase.auth.currentUser!!.uid).
+        addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists())
+                {
+                    var currentCoins=snapshot.getValue() as Long
+                    binding.coinwithdraw.text=currentCoins.toString()
+
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
         return binding.root
     }
 

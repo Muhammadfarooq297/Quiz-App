@@ -41,7 +41,7 @@ class HomeFragment : Fragment() {
             bottomSheetDialog.show(requireActivity().supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition
         }
-        binding.coin.setOnClickListener {
+        binding.coinwithdraw.setOnClickListener {
             val bottomSheetDialog: BottomSheetDialogFragment = withdrawal()
             bottomSheetDialog.show(requireActivity().supportFragmentManager,"TEST")
             bottomSheetDialog.enterTransition
@@ -63,6 +63,23 @@ class HomeFragment : Fragment() {
                 }
 
             )
+        Firebase.database.reference.child("playerCoins").child(Firebase.auth.currentUser!!.uid).
+        addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists())
+                {
+                    var currentCoins=snapshot.getValue() as Long
+                    binding.coinwithdraw.text=currentCoins.toString()
+
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
         // Inflate the layout for this fragment
         return binding.root
     }
