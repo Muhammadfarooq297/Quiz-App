@@ -74,7 +74,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView17" />
 
         <EditText
-            android:id="@+id/editTextText3"
+            android:id="@+id/amount"
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:layout_marginStart="15dp"
@@ -103,12 +103,12 @@
             android:hint="Enter Credit Card Number"
             android:inputType="text"
             android:paddingStart="15dp"
-            app:layout_constraintEnd_toEndOf="@+id/editTextText3"
-            app:layout_constraintStart_toStartOf="@+id/editTextText3"
-            app:layout_constraintTop_toBottomOf="@+id/editTextText3" />
+            app:layout_constraintEnd_toEndOf="@+id/amount"
+            app:layout_constraintStart_toStartOf="@+id/amount"
+            app:layout_constraintTop_toBottomOf="@+id/amount" />
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/transferBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"

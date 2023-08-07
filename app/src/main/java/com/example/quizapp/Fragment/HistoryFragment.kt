@@ -20,6 +20,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import java.util.Collections
 
 
 class HistoryFragment : Fragment() {
@@ -34,12 +35,15 @@ class HistoryFragment : Fragment() {
             .addValueEventListener(object :ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     ListHistory.clear()
+                    var ListHistory1=ArrayList<HistoryModelClass>()
                     for(datasnapshot in snapshot.children)
                     {
                         var data=datasnapshot.getValue(HistoryModelClass::class.java)
-                        ListHistory.add(data!!)
-                        adapter.notifyDataSetChanged()
+                        ListHistory1.add(data!!)
                     }
+                    Collections.reverse(ListHistory1)
+                    ListHistory.addAll(ListHistory1)
+                    adapter.notifyDataSetChanged()
 
                 }
 
